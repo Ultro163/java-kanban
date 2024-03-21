@@ -5,6 +5,7 @@ public class Epic extends Task {
 
     public Epic(String taskName, String taskDescription) {
         super(taskName, taskDescription);
+        setStatus(Status.NEW);
     }
 
     public ArrayList<Integer> getSubtaskListId() {
@@ -14,7 +15,7 @@ public class Epic extends Task {
     @Override
     public String toString() {
         return "Эпик {" +
-                "id=" + getTaskId() +
+                "id=" + getId() +
                 ", Название='" + getTaskName() + '\'' +
                 ", Описание='" + getTaskDescription() + '\'' +
                 ", Статус='" + getStatus() + '\'' +

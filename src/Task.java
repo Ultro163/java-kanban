@@ -3,7 +3,7 @@ import java.util.Objects;
 public class Task {
     private String taskName;
     private String taskDescription;
-    private int taskId;
+    private int Id;
     private Status status;
 
     public Task(String taskName, String taskDescription) {
@@ -25,16 +25,16 @@ public class Task {
         return taskDescription;
     }
 
-    public int getTaskId() {
-        return taskId;
+    public int getId() {
+        return Id;
     }
 
     public Status getStatus() {
         return status;
     }
 
-    public void setTaskId(int taskId) {
-        this.taskId = taskId;
+    public void setId(int id) {
+        this.Id = id;
     }
 
     public void setStatus(Status status) {
@@ -53,13 +53,13 @@ public class Task {
 
     @Override
     public int hashCode() {
-        return taskId;
+        return Id;
     }
 
     @Override
     public String toString() {
         return "Задача {" +
-                "id=" + getTaskId() +
+                "id=" + getId() +
                 ", Название='" + getTaskName() + '\'' +
                 ", Описание='" + getTaskDescription() + '\'' +
                 ", Статус='" + getStatus() + '\'' +
