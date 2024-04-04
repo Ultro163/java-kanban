@@ -87,7 +87,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void newVersionTask(Task newTask, int idTask) {
+    public void updateTask(Task newTask, int idTask) {
         if (tasks.containsKey(idTask)) {
             newTask.setId(idTask);
             tasks.put(idTask, newTask);
@@ -97,7 +97,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void newVersionSubtask(Subtask newSubtask, int idSubtask) {
+    public void updateSubtask(Subtask newSubtask, int idSubtask) {
         if (subtasks.containsKey(idSubtask)) {
             newSubtask.setId(idSubtask);
             subtasks.put(idSubtask, newSubtask);
@@ -109,7 +109,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void newVersionEpic(Epic newEpic, int idEpic) {
+    public void updateEpic(Epic newEpic, int idEpic) {
         if (epics.containsKey(idEpic)) {
             ArrayList<Integer> listID = epics.get(idEpic).getSubtaskListId();
             newEpic.getSubtaskListId().addAll(listID);
@@ -177,17 +177,17 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Task> getTask() {
+    public ArrayList<Task> getAllTasks() {
         return new ArrayList<>(tasks.values());
     }
 
     @Override
-    public ArrayList<Subtask> getSubtask() {
+    public ArrayList<Subtask> getAllSubtasks() {
         return new ArrayList<>(subtasks.values());
     }
 
     @Override
-    public ArrayList<Epic> getEpic() {
+    public ArrayList<Epic> getAllEpics() {
         return new ArrayList<>(epics.values());
     }
 }

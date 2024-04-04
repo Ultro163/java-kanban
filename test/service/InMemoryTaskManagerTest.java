@@ -63,9 +63,9 @@ class InMemoryTaskManagerTest {
 
     @Test
     public void checkingForAddedAllTasks() {
-        assertFalse(taskManager.getTask().isEmpty(), "Задачи не добавились");
-        assertFalse(taskManager.getSubtask().isEmpty(), "Задачи не добавились");
-        assertFalse(taskManager.getEpic().isEmpty(), "Задачи не добавились");
+        assertFalse(taskManager.getAllTasks().isEmpty(), "Задачи не добавились");
+        assertFalse(taskManager.getAllSubtasks().isEmpty(), "Задачи не добавились");
+        assertFalse(taskManager.getAllEpics().isEmpty(), "Задачи не добавились");
     }
 
     @Test
@@ -76,9 +76,9 @@ class InMemoryTaskManagerTest {
                 "Измененное описание подзадачи 1", Status.DONE, 3);
         final Epic epic = new Epic("Измененный Эпик 1 (ИД 3)", " Измененное описание эпика 1");
 
-        taskManager.newVersionTask(task, 1);
-        taskManager.newVersionSubtask(subtask, 5);
-        taskManager.newVersionEpic(epic, 3);
+        taskManager.updateTask(task, 1);
+        taskManager.updateSubtask(subtask, 5);
+        taskManager.updateEpic(epic, 3);
 
         assertEquals(task, taskManager.getTaskById(1), "Задача не обновилась");
         assertEquals(subtask, taskManager.getSubtaskById(5), "Задача не обновилась");
@@ -87,11 +87,11 @@ class InMemoryTaskManagerTest {
 
     @Test
     public void checkingUpdateEpicStatus() {
-        taskManager.newVersionSubtask(new Subtask("Измененная подзадача 1 для эпика 1 (ИД 5)",
+        taskManager.updateSubtask(new Subtask("Измененная подзадача 1 для эпика 1 (ИД 5)",
                 "Измененное описание подзадачи 1", Status.DONE, 3), 5);
         assertSame(taskManager.getEpicById(3).getStatus(), Status.IN_PROGRESS);
 
-        taskManager.newVersionSubtask(new Subtask("Измененная подзадача 2 для эпика 1 (ИД 6)",
+        taskManager.updateSubtask(new Subtask("Измененная подзадача 2 для эпика 1 (ИД 6)",
                 "Измененное описание подзадачи 2", Status.DONE, 3), 6);
         assertSame(taskManager.getEpicById(3).getStatus(), Status.DONE);
 
@@ -109,8 +109,8 @@ class InMemoryTaskManagerTest {
         assertNull(taskManager.getEpicById(3), "Задача не удалена");
 
         taskManager.removeAllTasks();
-        assertTrue(taskManager.getTask().isEmpty(), "Задачи не удалились");
-        assertTrue(taskManager.getSubtask().isEmpty(), "Задачи не удалились");
-        assertTrue(taskManager.getEpic().isEmpty(), "Задачи не удалились");
+        assertTrue(taskManager.getAllTasks().isEmpty(), "Задачи не удалились");
+        assertTrue(taskManager.getAllSubtasks().isEmpty(), "Задачи не удалились");
+        assertTrue(taskManager.getAllEpics().isEmpty(), "Задачи не удалились");
     }
 }
