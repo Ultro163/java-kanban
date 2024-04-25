@@ -9,8 +9,8 @@ import java.util.List;
 
 public interface TaskManager {
 
-
     List<Task> getHistory();
+
     void addNewTask(Task task);
 
     void addNewSubtask(Subtask subtask);
@@ -19,7 +19,7 @@ public interface TaskManager {
 
     void checkStatus(Epic epic);
 
-    void getSubtaskForEpic(int epicId);
+    List<Task> getSubtaskForEpic(int epicId);
 
     void updateTask(Task newTask, int idTask);
 
