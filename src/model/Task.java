@@ -5,7 +5,7 @@ import java.util.Objects;
 public class Task {
     private final String taskName;
     private final String taskDescription;
-    private int Id;
+    private int id;
     private Status status;
 
     public Task(String taskName, String taskDescription) {
@@ -28,7 +28,7 @@ public class Task {
     }
 
     public int getId() {
-        return Id;
+        return id;
     }
 
     public Status getStatus() {
@@ -36,7 +36,7 @@ public class Task {
     }
 
     public void setId(int id) {
-        this.Id = id;
+        this.id = id;
     }
 
     public void setStatus(Status status) {
@@ -55,7 +55,7 @@ public class Task {
 
     @Override
     public int hashCode() {
-        return Id;
+        return id;
     }
 
     @Override
