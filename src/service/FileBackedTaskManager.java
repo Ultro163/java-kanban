@@ -49,11 +49,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Task task = fromString(line);
                 manager.addTask(task);
 
-
                 if (manager.generatedId <= task.getId()) {
                     manager.generatedId = task.getId() + 1;
                 }
-
             }
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка при загрузке файла.");
@@ -109,8 +107,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 task.setId(Integer.parseInt(taskSplit[0]));
                 return task;
             case "SUBTASK":
-                task = new Subtask(taskSplit[2], taskSplit[4], Status.valueOf(taskSplit[3])
-                        , Integer.parseInt(taskSplit[5]));
+                task = new Subtask(taskSplit[2], taskSplit[4], Status.valueOf(taskSplit[3]),
+                        Integer.parseInt(taskSplit[5]));
                 task.setId(Integer.parseInt(taskSplit[0]));
                 return task;
             case "EPIC":
