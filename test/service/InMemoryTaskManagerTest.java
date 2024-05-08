@@ -23,7 +23,6 @@ class InMemoryTaskManagerTest {
         taskManager.addNewEpic(new Epic("Эпик 1 (ИД 3)", "описание эпика 1"));
         taskManager.addNewEpic(new Epic("Эпик 2 (ИД 4)", "описание эпика 2"));
 
-
         taskManager.addNewSubtask(new Subtask("подзадача 1 для эпика 1 (ИД 5)",
                 "описание подзадачи 1", Status.NEW, 3));
         taskManager.addNewSubtask(new Subtask("подзадача 2 для эпика 1 (ИД 6)",
@@ -50,13 +49,10 @@ class InMemoryTaskManagerTest {
         taskManager.getEpicById(3);
         taskManager.getTaskById(1);
 
-
         final List<Task> historyList = taskManager.getHistory();
         assertEquals("подзадача 1 для эпика 1 (ИД 5)", historyList.getFirst().getTaskName(),
                 "Задача не соответствует");
         assertEquals("1", historyList.getLast().getTaskName(), "Задача не соответствует");
-
-
     }
 
     @Test
@@ -91,7 +87,6 @@ class InMemoryTaskManagerTest {
                 "Измененное описание подзадачи 1", Status.DONE, 3);
         final Epic epic = new Epic("Измененный Эпик 1 (ИД 3)", " Измененное описание эпика 1");
 
-
         taskManager.updateTask(task, 1);
         taskManager.updateSubtask(subtask, 5);
         taskManager.updateEpic(epic, 3);
@@ -123,7 +118,6 @@ class InMemoryTaskManagerTest {
         assertNull(taskManager.getTaskById(2), "Задача не удалена");
         assertNull(taskManager.getSubtaskById(5), "Задача не удалена");
         assertNull(taskManager.getEpicById(3), "Задача не удалена");
-
 
         taskManager.removeAllTasks();
         assertTrue(taskManager.getAllTasks().isEmpty(), "Задачи не удалились");
