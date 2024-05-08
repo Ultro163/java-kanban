@@ -101,17 +101,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         Task task = new Task();
         String[] taskSplit = value.split(",");
 
-        switch (taskSplit[1]) {
-            case "TASK":
+        switch (TaskType.valueOf(taskSplit[1])) {
+            case TaskType.TASK:
                 task = new Task(taskSplit[2], taskSplit[4], Status.valueOf(taskSplit[3]));
                 task.setId(Integer.parseInt(taskSplit[0]));
                 return task;
-            case "SUBTASK":
+            case TaskType.SUBTASK:
                 task = new Subtask(taskSplit[2], taskSplit[4], Status.valueOf(taskSplit[3]),
                         Integer.parseInt(taskSplit[5]));
                 task.setId(Integer.parseInt(taskSplit[0]));
                 return task;
-            case "EPIC":
+            case TaskType.EPIC:
                 task = new Epic(taskSplit[2], taskSplit[4], Status.valueOf(taskSplit[3]));
                 task.setId(Integer.parseInt(taskSplit[0]));
                 return task;
