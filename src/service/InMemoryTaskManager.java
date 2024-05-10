@@ -12,11 +12,11 @@ import java.util.List;
 public class InMemoryTaskManager implements TaskManager {
     HistoryManager historyManager = Managers.getDefaultHistory();
 
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
+    protected final HashMap<Integer, Task> tasks = new HashMap<>();
+    protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    protected final HashMap<Integer, Epic> epics = new HashMap<>();
 
-    private int generatedId = 1;
+    protected int generatedId = 1;
 
     @Override
     public List<Task> getHistory() {
@@ -75,9 +75,14 @@ public class InMemoryTaskManager implements TaskManager {
     public List<Task> getSubtaskForEpic(int epicId) {
         Epic epic1 = epics.get(epicId);
         ArrayList<Task> subtasksList = new ArrayList<>();
-        for (Integer subId : epic1.getSubtaskListId()) {
-            subtasksList.add(subtasks.get(subId));
+        try {
+            for (Integer subId : epic1.getSubtaskListId()) {
+                subtasksList.add(subtasks.get(subId));
+            }
+        } catch (NullPointerException e) {
+            System.out.println("Такого эпика нет.");
         }
+
         return subtasksList;
     }
 

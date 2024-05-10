@@ -10,6 +10,16 @@ public class Epic extends Task {
         setStatus(Status.NEW);
     }
 
+    public Epic(String taskName, String taskDescription, Status status) {
+        super(taskName, taskDescription, status);
+        setStatus(Status.NEW);
+
+    }
+
+    public TaskType getType() {
+        return TaskType.EPIC;
+    }
+
     public ArrayList<Integer> getSubtaskListId() {
         return subtaskListId;
     }

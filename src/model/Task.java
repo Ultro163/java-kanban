@@ -3,10 +3,15 @@ package model;
 import java.util.Objects;
 
 public class Task {
-    private final String taskName;
-    private final String taskDescription;
-    private int id;
+    protected String taskName;
+    protected String taskDescription;
+    protected int id;
     private Status status;
+
+
+    public Task() {
+
+    }
 
     public Task(String taskName, String taskDescription) {
         this.taskName = taskName;
@@ -17,6 +22,10 @@ public class Task {
         this.taskName = taskName;
         this.taskDescription = taskDescription;
         this.status = status;
+    }
+
+    public TaskType getType() {
+        return TaskType.TASK;
     }
 
     public String getTaskName() {
