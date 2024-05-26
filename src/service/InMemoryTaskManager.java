@@ -114,25 +114,22 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     protected void checkStatus(Epic epic) {
-        int counterNew = 0;
-        int counterInProgress = 0;
-        int counterDone = 0;
-        for (Integer subtaskId : epic.getSubtaskListId()) {
-            Subtask currentSubtask = subtasks.get(subtaskId);
-            if (currentSubtask.getStatus() == Status.NEW) {
-                counterNew++;
-            } else if (currentSubtask.getStatus() == Status.IN_PROGRESS) {
-                counterInProgress++;
-            } else if (currentSubtask.getStatus() == Status.DONE) {
-                counterDone++;
-            }
-        }
-        if (counterNew >= 0 && counterInProgress == 0 && counterDone == 0) {
-            epics.get(epic.getId()).setStatus(Status.NEW);
-        } else if (counterDone > 0 && counterNew == 0 && counterInProgress == 0) {
-            epics.get(epic.getId()).setStatus(Status.DONE);
+        boolean statusNew = epic.getSubtaskListId().stream()
+                .map(subtasks::get)
+                .anyMatch(subtask -> subtask.getStatus() == Status.NEW);
+        boolean statusInProgress = epic.getSubtaskListId().stream()
+                .map(subtasks::get)
+                .anyMatch(subtask -> subtask.getStatus() == Status.IN_PROGRESS);
+        boolean statusDone = epic.getSubtaskListId().stream()
+                .map(subtasks::get)
+                .anyMatch(subtask -> subtask.getStatus() == Status.DONE);
+
+        if (statusNew && !statusInProgress && !statusDone) {
+            epic.setStatus(Status.NEW);
+        } else if (statusDone && !statusInProgress && !statusNew) {
+            epic.setStatus(Status.DONE);
         } else {
-            epics.get(epic.getId()).setStatus(Status.IN_PROGRESS);
+            epic.setStatus(Status.IN_PROGRESS);
         }
     }
 
