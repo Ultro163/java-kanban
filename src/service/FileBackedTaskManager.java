@@ -5,10 +5,13 @@ import model.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
-    public static final String HEADER = "id,type,name,status,description,epic";
+    public static final String HEADER = "id,type,name,status,description,epic,dataTime,duration";
     private final File backFile;
 
     public FileBackedTaskManager(File file) {
@@ -69,9 +72,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 final int epicId = subtask.getEpicId();
                 super.subtasks.put(subtask.getId(), subtask);
                 epics.get(epicId).getSubtaskListId().add(subtask.getId());
+                super.setTimeEpic(epics.get(epicId));
                 break;
             case TaskType.EPIC:
                 Epic epic = (Epic) task;
+                super.setTimeEpic(epic);
                 super.epics.put(epic.getId(), epic);
                 break;
         }
@@ -87,12 +92,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 .append(",")
                 .append(task.getStatus())
                 .append(",")
-                .append(task.getTaskDescription())
-                .append(",");
+                .append(task.getTaskDescription());
 
         if (task.getType() == TaskType.SUBTASK) {
             Subtask subtask = (Subtask) task;
-            sb.append(subtask.getEpicId());
+            sb.append(",").append(subtask.getEpicId());
+        }
+        Optional<LocalDateTime> startTime = Optional.ofNullable(task.getStartTime());
+        if (startTime.isPresent()) {
+            sb.append(",").append(task.getStartTime()).append(",").append(task.getDuration());
         }
         return sb.toString();
     }
@@ -103,10 +111,23 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         switch (TaskType.valueOf(taskSplit[1])) {
             case TaskType.TASK:
+                if (taskSplit.length > 6) {
+                    task = new Task(taskSplit[2], taskSplit[4], Status.valueOf(taskSplit[3]),
+                            LocalDateTime.parse(taskSplit[6]),
+                            Duration.parse(taskSplit[7]));
+                    return task;
+                }
                 task = new Task(taskSplit[2], taskSplit[4], Status.valueOf(taskSplit[3]));
                 task.setId(Integer.parseInt(taskSplit[0]));
                 return task;
             case TaskType.SUBTASK:
+                if (taskSplit.length > 6) {
+                    task = new Subtask(taskSplit[2], taskSplit[4], Status.valueOf(taskSplit[3]),
+                            Integer.parseInt(taskSplit[5]),
+                            LocalDateTime.parse(taskSplit[6]), Duration.parse(taskSplit[7]));
+                    task.setId(Integer.parseInt(taskSplit[0]));
+                    return task;
+                }
                 task = new Subtask(taskSplit[2], taskSplit[4], Status.valueOf(taskSplit[3]),
                         Integer.parseInt(taskSplit[5]));
                 task.setId(Integer.parseInt(taskSplit[0]));
