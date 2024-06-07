@@ -1,7 +1,7 @@
 package service;
 
-import HttpServer.adapters.DurationAdapter;
-import HttpServer.adapters.LocalDateTimeAdapter;
+import httpServer.adapters.DurationAdapter;
+import httpServer.adapters.LocalDateTimeAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 

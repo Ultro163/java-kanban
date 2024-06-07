@@ -1,24 +1,22 @@
-package HttpServer.handlers;
+package httpServer.handlers;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import exceptions.NotFoundTaskException;
-import model.Epic;
-import model.Subtask;
+import exceptions.TimeOverlapException;
+import model.Task;
 import service.FileBackedTaskManager;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
-public class EpicHandler extends BaseHttpHandler implements HttpHandler {
+public class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
     FileBackedTaskManager manager;
     Gson gson;
 
-    public EpicHandler(FileBackedTaskManager manager, Gson gson) {
+    public TaskHandler(FileBackedTaskManager manager, Gson gson) {
         this.manager = manager;
         this.gson = gson;
     }
@@ -29,13 +27,13 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
 
         switch (method) {
             case "GET":
-                handleEpicGet(exchange);
+                handleGet(exchange);
                 break;
             case "POST":
-                handleEpicPost(exchange);
+                handlePost(exchange);
                 break;
             case "DELETE":
-                handleEpicDelete(exchange);
+                handleDelete(exchange);
                 break;
             default:
                 sendCustomResponse(exchange, "Неверный путь", 405);
@@ -43,47 +41,42 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
         }
     }
 
-    private void handleEpicGet(HttpExchange exchange) throws IOException {
+    private void handleGet(HttpExchange exchange) throws IOException {
         String[] path = exchange.getRequestURI().getPath().split("/");
 
         if (path.length <= 2) {
-            sendText(exchange, gson.toJson(manager.getAllEpics()));
-        } else if (path.length == 3) {
-            try {
-                Epic epic = manager.getEpicById(Integer.parseInt(path[2]));
-                sendText(exchange, gson.toJson(epic));
-            } catch (NotFoundTaskException e) {
-                sendNotFound(exchange);
-            }
+            sendText(exchange, gson.toJson(manager.getAllTasks()));
         } else {
             try {
-                List<Subtask> subtasks = manager.getSubtaskForEpic(Integer.parseInt(path[2]));
-                sendText(exchange, gson.toJson(subtasks));
-            } catch (NullPointerException | NotFoundTaskException e) {
+                Task task = manager.getTaskById(Integer.parseInt(path[2]));
+                sendText(exchange, gson.toJson(task));
+            } catch (NotFoundTaskException e) {
                 sendNotFound(exchange);
             }
         }
     }
 
-    private void handleEpicPost(HttpExchange exchange) throws IOException {
+    private void handlePost(HttpExchange exchange) throws IOException {
         String[] path = exchange.getRequestURI().getPath().split("/");
         String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
 
         if (path.length <= 2) {
             try {
-                Epic epic = gson.fromJson(body, Epic.class);
-                epic.setSubtaskListId(new ArrayList<>());
-                manager.addNewEpic(epic);
+                Task task = gson.fromJson(body, Task.class);
+                manager.addNewTask(task);
                 sendNoText(exchange);
+            } catch (TimeOverlapException e) {
+                sendHasInteractions(exchange);
             } catch (NullPointerException e) {
                 sendCustomResponse(exchange, "Задача не передана в запросе", 400);
             }
         } else {
             try {
-                Epic epic = gson.fromJson(body, Epic.class);
-                epic.setSubtaskListId(new ArrayList<>());
-                manager.updateEpic(epic, Integer.parseInt(path[2]));
+                Task task = gson.fromJson(body, Task.class);
+                manager.updateTask(task, Integer.parseInt(path[2]));
                 sendNoText(exchange);
+            } catch (TimeOverlapException e) {
+                sendHasInteractions(exchange);
             } catch (NullPointerException e) {
                 sendCustomResponse(exchange, "Задача не передана в запросе", 400);
             } catch (NotFoundTaskException e) {
@@ -92,10 +85,10 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
         }
     }
 
-    private void handleEpicDelete(HttpExchange exchange) throws IOException {
+    private void handleDelete(HttpExchange exchange) throws IOException {
         try {
             String[] path = exchange.getRequestURI().getPath().split("/");
-            manager.removeEpicById(Integer.parseInt(path[2]));
+            manager.removeTaskById(Integer.parseInt(path[2]));
             sendText(exchange, "Задача удалена.");
         } catch (NumberFormatException | NullPointerException e) {
             sendNotFound(exchange);

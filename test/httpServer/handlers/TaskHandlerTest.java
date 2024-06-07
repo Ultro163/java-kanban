@@ -1,6 +1,6 @@
-package HttpServer.handlers;
+package httpServer.handlers;
 
-import HttpServer.HttpTaskServer;
+import httpServer.HttpTaskServer;
 import com.google.gson.Gson;
 import model.Status;
 import model.Task;

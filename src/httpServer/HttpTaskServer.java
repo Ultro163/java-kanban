@@ -1,6 +1,6 @@
-package HttpServer;
+package httpServer;
 
-import HttpServer.handlers.*;
+import httpServer.handlers.*;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpServer;
 import service.FileBackedTaskManager;
