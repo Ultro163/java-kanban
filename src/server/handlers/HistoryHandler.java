@@ -1,4 +1,4 @@
-package httpServer.handlers;
+package server.handlers;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
@@ -9,11 +9,11 @@ import service.FileBackedTaskManager;
 import java.io.IOException;
 import java.util.List;
 
-public class PrioritizedTasksHandler extends BaseHttpHandler implements HttpHandler {
+public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
     FileBackedTaskManager manager;
     Gson gson;
 
-    public PrioritizedTasksHandler(FileBackedTaskManager manager, Gson gson) {
+    public HistoryHandler(FileBackedTaskManager manager, Gson gson) {
         this.manager = manager;
         this.gson = gson;
     }
@@ -23,7 +23,7 @@ public class PrioritizedTasksHandler extends BaseHttpHandler implements HttpHand
         String method = exchange.getRequestMethod();
 
         if (method.equals("GET")) {
-            List<Task> tasks = manager.getPrioritizedTasks();
+            List<Task> tasks = manager.getHistory();
             sendText(exchange, gson.toJson(tasks));
         } else {
             sendCustomResponse(exchange, "Неверный путь", 405);

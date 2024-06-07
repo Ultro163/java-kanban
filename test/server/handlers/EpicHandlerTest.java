@@ -1,6 +1,6 @@
-package httpServer.handlers;
+package server.handlers;
 
-import httpServer.HttpTaskServer;
+import server.HttpTaskServer;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import model.Epic;

@@ -1,10 +1,8 @@
-package httpServer.handlers;
+package server.handlers;
 
-import httpServer.HttpTaskServer;
+import server.HttpTaskServer;
 import com.google.gson.Gson;
-import model.Epic;
 import model.Status;
-import model.Subtask;
 import model.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,13 +23,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SubtasksHandlerTest {
+class TaskHandlerTest {
     File file;
     FileBackedTaskManager manager;
     HttpTaskServer server;
     Gson gson;
 
-    SubtasksHandlerTest() {
+    TaskHandlerTest() {
     }
 
     @BeforeEach
@@ -49,18 +47,15 @@ public class SubtasksHandlerTest {
     }
 
     @Test
-    public void testAddSubtask() throws IOException, InterruptedException {
-        Epic epic = new Epic("Эпик 1", "Опись Эпика 1");
-        manager.addNewEpic(epic);
+    public void testAddTask() throws IOException, InterruptedException {
+        Task task = new Task("Test 1", "Testing task 1",
+                Status.NEW, LocalDateTime.now(), Duration.ofMinutes(5));
 
-        Subtask subtask = new Subtask("Test 1", "Testing task 1",
-                Status.NEW, 1, LocalDateTime.now(), Duration.ofMinutes(5));
-
-        String taskJson = gson.toJson(subtask);
+        String taskJson = gson.toJson(task);
 
         HttpResponse<String> response;
         try (HttpClient client = HttpClient.newHttpClient()) {
-            URI url = URI.create("http://localhost:8080/subtasks");
+            URI url = URI.create("http://localhost:8080/tasks");
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(url).POST(HttpRequest.BodyPublishers.ofString(taskJson)).build();
 
@@ -68,31 +63,27 @@ public class SubtasksHandlerTest {
         }
         assertEquals(201, response.statusCode());
 
-        List<Subtask> subtasksFromManager = manager.getAllSubtasks();
+        List<Task> tasksFromManager = manager.getAllTasks();
 
-        assertNotNull(subtasksFromManager, "Задачи не возвращаются");
-        assertEquals(1, subtasksFromManager.size(), "Некорректное количество задач");
-        assertEquals(subtask, subtasksFromManager.getFirst(), "Некорректное имя задачи");
+        assertNotNull(tasksFromManager, "Задачи не возвращаются");
+        assertEquals(1, tasksFromManager.size(), "Некорректное количество задач");
+        assertEquals("Test 1", tasksFromManager.getFirst().getTaskName(), "Некорректное имя задачи");
     }
 
     @Test
-    public void testUpdateSubtask() throws IOException, InterruptedException {
-        Epic epic = new Epic("Эпик 1", "Опись Эпика 1");
-        manager.addNewEpic(epic);
+    public void testUpdateTask() throws IOException, InterruptedException {
+        Task task = new Task("Test 1", "Testing task 1",
+                Status.NEW, LocalDateTime.now(), Duration.ofMinutes(5));
+        manager.addNewTask(task);
 
-        Subtask subtask = new Subtask("Test 1", "Testing task 1",
-                Status.NEW, 1,
-                LocalDateTime.of(2024, 5, 21, 17, 0), Duration.ofMinutes(5));
-        manager.addNewSubtask(subtask);
+        Task task2 = new Task("Test 2", "Testing task 2",
+                Status.NEW, LocalDateTime.now(), Duration.ofMinutes(5));
 
-        Subtask subtask2 = new Subtask("Test 1", "Testing task 1",
-                Status.NEW, 1, LocalDateTime.of(2024, 6, 21, 17, 0), Duration.ofMinutes(5));
-
-        String taskJson = gson.toJson(subtask2);
+        String taskJson = gson.toJson(task2);
 
         HttpResponse<String> response;
         try (HttpClient client = HttpClient.newHttpClient()) {
-            URI url = URI.create("http://localhost:8080/subtasks/2");
+            URI url = URI.create("http://localhost:8080/tasks/1");
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(url).POST(HttpRequest.BodyPublishers.ofString(taskJson)).build();
 
@@ -100,23 +91,19 @@ public class SubtasksHandlerTest {
         }
         assertEquals(201, response.statusCode());
 
-        List<Subtask> tasksFromManager = manager.getAllSubtasks();
-        assertEquals(subtask2, tasksFromManager.getFirst(), "Некорректное имя задачи");
+        List<Task> tasksFromManager = manager.getAllTasks();
+        assertEquals(task2, tasksFromManager.getFirst(), "Некорректное имя задачи");
     }
 
     @Test
-    public void testDeleteSubtask() throws IOException, InterruptedException {
-        Epic epic = new Epic("Эпик 1", "Опись Эпика 1");
-        manager.addNewEpic(epic);
-
-        Subtask subtask = new Subtask("Test 1", "Testing task 1",
-                Status.NEW, 1,
-                LocalDateTime.of(2024, 5, 21, 17, 0), Duration.ofMinutes(5));
-        manager.addNewSubtask(subtask);
+    public void testDeleteTask() throws IOException, InterruptedException {
+        Task task = new Task("Test 1", "Testing task 1",
+                Status.NEW, LocalDateTime.now(), Duration.ofMinutes(5));
+        manager.addNewTask(task);
 
         HttpResponse<String> response;
         try (HttpClient client = HttpClient.newHttpClient()) {
-            URI url = URI.create("http://localhost:8080/subtasks/2");
+            URI url = URI.create("http://localhost:8080/tasks/1");
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(url).DELETE().build();
 
@@ -124,33 +111,30 @@ public class SubtasksHandlerTest {
         }
         assertEquals(200, response.statusCode());
 
-        List<Subtask> tasksFromManager = manager.getAllSubtasks();
+        List<Task> tasksFromManager = manager.getAllTasks();
 
         assertEquals(0, tasksFromManager.size(), "Некорректное количество задачю");
         assertArrayEquals(new ArrayList<>().toArray(), tasksFromManager.toArray(), "Задача не удалена.");
     }
 
     @Test
-    public void testTimeOverlappingSubtasks() throws IOException, InterruptedException {
-        Epic epic = new Epic("Эпик 1", "Опись Эпика 1");
-        manager.addNewEpic(epic);
-
-        Subtask subtask1 = new Subtask("Задача 1", "описание задачи 1", Status.NEW, 1,
+    public void testTimeOverlappingTasks() throws IOException, InterruptedException {
+        Task task1 = new Task("Задача 1", "описание задачи 1", Status.NEW,
                 LocalDateTime.of(2024, 5, 21, 17, 0), Duration.ofHours(4));
-        manager.addNewSubtask(subtask1);
+        manager.addNewTask(task1);
 
-        Subtask subtask2 = new Subtask("Задача 2", "описание задачи 2", Status.NEW, 1,
+        Task task2 = new Task("Задача 2", "описание задачи 2", Status.NEW,
                 LocalDateTime.of(2024, 5, 22, 17, 0), Duration.ofHours(4));
-        manager.addNewSubtask(subtask2);
+        manager.addNewTask(task2);
 
-        Subtask subtask3 = new Subtask("Test 1", "Testing task 1",
-                Status.NEW, 1, LocalDateTime.of(2024, 5, 21, 17, 1), Duration.ofHours(4));
+        Task task3 = new Task("Test 1", "Testing task 1",
+                Status.NEW, LocalDateTime.of(2024, 5, 21, 17, 1), Duration.ofHours(4));
 
-        String taskJson = gson.toJson(subtask3);
+        String taskJson = gson.toJson(task3);
 
         HttpResponse<String> response;
         try (HttpClient client = HttpClient.newHttpClient()) {
-            URI url = URI.create("http://localhost:8080/subtasks");
+            URI url = URI.create("http://localhost:8080/tasks");
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(url).POST(HttpRequest.BodyPublishers.ofString(taskJson)).build();
 
@@ -163,7 +147,7 @@ public class SubtasksHandlerTest {
 
         HttpResponse<String> response2;
         try (HttpClient client = HttpClient.newHttpClient()) {
-            URI url = URI.create("http://localhost:8080/subtasks/3");
+            URI url = URI.create("http://localhost:8080/tasks/2");
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(url).POST(HttpRequest.BodyPublishers.ofString(taskJson)).build();
 
@@ -183,7 +167,7 @@ public class SubtasksHandlerTest {
         }
         assertEquals(200, response3.statusCode());
         List<Task> tasksFromManager = manager.getPrioritizedTasks();
-        List<Task> tasksList = List.of(subtask1, subtask2);
+        List<Task> tasksList = List.of(task1, task2);
 
         assertEquals(2, tasksFromManager.size(), "Некорректное количество задач");
         assertArrayEquals(tasksList.toArray(), tasksFromManager.toArray(), "Задачи не верные.");

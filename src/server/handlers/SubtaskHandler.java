@@ -1,22 +1,22 @@
-package httpServer.handlers;
+package server.handlers;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import exceptions.NotFoundTaskException;
 import exceptions.TimeOverlapException;
-import model.Task;
+import model.Subtask;
 import service.FileBackedTaskManager;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class TaskHandler extends BaseHttpHandler implements HttpHandler {
+public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
 
     FileBackedTaskManager manager;
     Gson gson;
 
-    public TaskHandler(FileBackedTaskManager manager, Gson gson) {
+    public SubtaskHandler(FileBackedTaskManager manager, Gson gson) {
         this.manager = manager;
         this.gson = gson;
     }
@@ -27,13 +27,13 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
         switch (method) {
             case "GET":
-                handleGet(exchange);
+                handleSubtaskGet(exchange);
                 break;
             case "POST":
-                handlePost(exchange);
+                handleSubtaskPost(exchange);
                 break;
             case "DELETE":
-                handleDelete(exchange);
+                handleSubtaskDelete(exchange);
                 break;
             default:
                 sendCustomResponse(exchange, "Неверный путь", 405);
@@ -41,29 +41,29 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
         }
     }
 
-    private void handleGet(HttpExchange exchange) throws IOException {
+    private void handleSubtaskGet(HttpExchange exchange) throws IOException {
         String[] path = exchange.getRequestURI().getPath().split("/");
 
         if (path.length <= 2) {
-            sendText(exchange, gson.toJson(manager.getAllTasks()));
+            sendText(exchange, gson.toJson(manager.getAllSubtasks()));
         } else {
             try {
-                Task task = manager.getTaskById(Integer.parseInt(path[2]));
-                sendText(exchange, gson.toJson(task));
+                Subtask subtask = manager.getSubtaskById(Integer.parseInt(path[2]));
+                sendText(exchange, gson.toJson(subtask));
             } catch (NotFoundTaskException e) {
                 sendNotFound(exchange);
             }
         }
     }
 
-    private void handlePost(HttpExchange exchange) throws IOException {
+    private void handleSubtaskPost(HttpExchange exchange) throws IOException {
         String[] path = exchange.getRequestURI().getPath().split("/");
         String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
 
         if (path.length <= 2) {
             try {
-                Task task = gson.fromJson(body, Task.class);
-                manager.addNewTask(task);
+                Subtask subtask = gson.fromJson(body, Subtask.class);
+                manager.addNewSubtask(subtask);
                 sendNoText(exchange);
             } catch (TimeOverlapException e) {
                 sendHasInteractions(exchange);
@@ -72,23 +72,23 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
             }
         } else {
             try {
-                Task task = gson.fromJson(body, Task.class);
-                manager.updateTask(task, Integer.parseInt(path[2]));
+                Subtask subtask = gson.fromJson(body, Subtask.class);
+                manager.updateSubtask(subtask, Integer.parseInt(path[2]));
                 sendNoText(exchange);
             } catch (TimeOverlapException e) {
                 sendHasInteractions(exchange);
-            } catch (NullPointerException e) {
-                sendCustomResponse(exchange, "Задача не передана в запросе", 400);
             } catch (NotFoundTaskException e) {
                 sendNotFound(exchange);
+            } catch (NullPointerException e) {
+                sendCustomResponse(exchange, "Задача не передана в запросе", 400);
             }
         }
     }
 
-    private void handleDelete(HttpExchange exchange) throws IOException {
+    private void handleSubtaskDelete(HttpExchange exchange) throws IOException {
         try {
             String[] path = exchange.getRequestURI().getPath().split("/");
-            manager.removeTaskById(Integer.parseInt(path[2]));
+            manager.removeSubtaskById(Integer.parseInt(path[2]));
             sendText(exchange, "Задача удалена.");
         } catch (NumberFormatException | NullPointerException e) {
             sendNotFound(exchange);
