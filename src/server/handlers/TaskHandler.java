@@ -13,12 +13,8 @@ import java.nio.charset.StandardCharsets;
 
 public class TaskHandler extends BaseHttpHandler implements HttpHandler {
 
-    FileBackedTaskManager manager;
-    Gson gson;
-
     public TaskHandler(FileBackedTaskManager manager, Gson gson) {
-        this.manager = manager;
-        this.gson = gson;
+        super(manager, gson);
     }
 
     @Override
@@ -44,7 +40,7 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
     private void handleGet(HttpExchange exchange) throws IOException {
         String[] path = exchange.getRequestURI().getPath().split("/");
 
-        if (path.length <= 2) {
+        if (path.length <= PATH_SEGMENT) {
             sendText(exchange, gson.toJson(manager.getAllTasks()));
         } else {
             try {
@@ -60,7 +56,7 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
         String[] path = exchange.getRequestURI().getPath().split("/");
         String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
 
-        if (path.length <= 2) {
+        if (path.length <= PATH_SEGMENT) {
             try {
                 Task task = gson.fromJson(body, Task.class);
                 manager.addNewTask(task);

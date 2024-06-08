@@ -11,9 +11,9 @@ import java.net.InetSocketAddress;
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
-    FileBackedTaskManager manager;
-    HttpServer httpServer;
-    Gson gson;
+    private final FileBackedTaskManager manager;
+    private final HttpServer httpServer;
+    private final Gson gson;
 
     public HttpTaskServer(FileBackedTaskManager manager) throws IOException {
         this.manager = manager;

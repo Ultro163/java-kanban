@@ -15,12 +15,8 @@ import java.util.List;
 
 public class EpicHandler extends BaseHttpHandler implements HttpHandler {
 
-    FileBackedTaskManager manager;
-    Gson gson;
-
     public EpicHandler(FileBackedTaskManager manager, Gson gson) {
-        this.manager = manager;
-        this.gson = gson;
+        super(manager, gson);
     }
 
     @Override
@@ -46,9 +42,9 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
     private void handleEpicGet(HttpExchange exchange) throws IOException {
         String[] path = exchange.getRequestURI().getPath().split("/");
 
-        if (path.length <= 2) {
+        if (path.length <= PATH_SEGMENT) {
             sendText(exchange, gson.toJson(manager.getAllEpics()));
-        } else if (path.length == 3) {
+        } else if (path.length == PATH_SEGMENT + 1) {
             try {
                 Epic epic = manager.getEpicById(Integer.parseInt(path[2]));
                 sendText(exchange, gson.toJson(epic));
@@ -69,7 +65,7 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
         String[] path = exchange.getRequestURI().getPath().split("/");
         String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
 
-        if (path.length <= 2) {
+        if (path.length <= PATH_SEGMENT) {
             try {
                 Epic epic = gson.fromJson(body, Epic.class);
                 epic.setSubtaskListId(new ArrayList<>());

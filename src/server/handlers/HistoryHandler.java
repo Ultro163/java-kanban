@@ -10,12 +10,9 @@ import java.io.IOException;
 import java.util.List;
 
 public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
-    FileBackedTaskManager manager;
-    Gson gson;
 
     public HistoryHandler(FileBackedTaskManager manager, Gson gson) {
-        this.manager = manager;
-        this.gson = gson;
+        super(manager, gson);
     }
 
     @Override
