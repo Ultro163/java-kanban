@@ -1,5 +1,6 @@
 package service;
 
+import exceptions.NotFoundTaskException;
 import exceptions.TimeOverlapException;
 import model.Epic;
 import model.Status;
@@ -70,6 +71,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void getSubtaskForEpic() {
         addTasks();
+
         Subtask subtask1 = (new Subtask("подзадача 3 для эпика 2 (ИД 7)",
                 "описание подзадачи 3", Status.NEW, 4));
         subtask1.setId(7);
@@ -84,6 +86,12 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void updateTask() {
         addTasks();
+        final Task task0 = new Task("Задача 3",
+                "описание задачи 3", Status.DONE,
+                LocalDateTime.of(2024, 5, 5, 5, 0),
+                Duration.ofHours(2));
+        taskManager.addNewTask(task0);
+
         final Task task = new Task("Измененная Задача 1",
                 "обновленное описание задачи 1", Status.DONE);
         taskManager.updateTask(task, 1);
@@ -91,27 +99,35 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         final Task task2 = new Task("Измененная Задача 1",
                 "обновленное описание задачи 1", Status.DONE,
-                LocalDateTime.of(2024, 5, 5, 5, 0),
-                Duration.ofHours(1));
+                LocalDateTime.of(2024, 5, 6, 5, 0),
+                Duration.ofHours(2));
 
         taskManager.updateTask(task2, 1);
-        assertEquals(task2, taskManager.getPrioritizedTasks().getFirst(), "Задача не обновлена.");
+        assertEquals(task2, taskManager.getPrioritizedTasks().getLast(), "Задача не обновлена.");
 
         final Task task3 = new Task("Измененная Задача 1",
                 "обновленное описание задачи 1", Status.DONE,
-                LocalDateTime.of(2024, 5, 5, 4, 0),
+                LocalDateTime.of(2024, 5, 5, 6, 0),
                 Duration.ofHours(2));
 
         Assertions.assertThrows(TimeOverlapException.class, () ->
-                taskManager.updateTask(task3, 1),
+                        taskManager.updateTask(task3, 1),
                 "Задача не может быть обновлена. Пересечение по времени.");
 
         assertEquals(task2, taskManager.getTaskById(1));
+        assertEquals(task2, taskManager.getPrioritizedTasks().getLast(), "Задача обновлена.");
     }
 
     @Test
     void updateSubtask() {
         addTasks();
+
+        final Subtask subtask0 = new Subtask("Измененная ПодЗадача 1",
+                "обновленное описание ПодЗадачи 1", Status.DONE, 3,
+                LocalDateTime.of(2024, 5, 5, 5, 0),
+                Duration.ofHours(1));
+        taskManager.addNewSubtask(subtask0);
+
         final Subtask subtask = new Subtask("Измененная подзадача 1 для эпика 1 (ИД 5)",
                 "Измененное описание подзадачи 1", Status.DONE, 3);
         taskManager.updateSubtask(subtask, 5);
@@ -119,7 +135,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         final Subtask subtask2 = new Subtask("Измененная ПодЗадача 1",
                 "обновленное описание ПодЗадачи 1", Status.DONE, 3,
-                LocalDateTime.of(2024, 5, 5, 5, 0),
+                LocalDateTime.of(2024, 5, 6, 5, 0),
                 Duration.ofHours(1));
 
         taskManager.updateSubtask(subtask2, 5);
@@ -131,7 +147,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 Duration.ofHours(2));
 
         Assertions.assertThrows(TimeOverlapException.class, () ->
-                taskManager.updateSubtask(subtask3, 5),
+                        taskManager.updateSubtask(subtask3, 5),
                 "Задача не может быть обновлена. Пересечение по времени.");
 
         assertEquals(subtask2, taskManager.getSubtaskById(5));
@@ -158,21 +174,24 @@ abstract class TaskManagerTest<T extends TaskManager> {
     void removeTaskById() {
         addTasks();
         taskManager.removeTaskById(2);
-        assertNull(taskManager.getTaskById(2), "Задача не удалена");
+        Assertions.assertThrows(NotFoundTaskException.class, () ->
+                taskManager.getTaskById(2), "Задача не удалена");
     }
 
     @Test
     void removeSubtaskById() {
         addTasks();
         taskManager.removeSubtaskById(5);
-        assertNull(taskManager.getSubtaskById(5), "Задача не удалена");
+        Assertions.assertThrows(NotFoundTaskException.class, () ->
+                taskManager.getSubtaskById(5), "Задача не удалена");
     }
 
     @Test
     void removeEpicById() {
         addTasks();
         taskManager.removeEpicById(3);
-        assertNull(taskManager.getEpicById(3), "Задача не удалена");
+        Assertions.assertThrows(NotFoundTaskException.class, () ->
+                taskManager.getEpicById(3), "Задача не удалена");
     }
 
     @Test
@@ -182,9 +201,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         Assertions.assertThrows(TimeOverlapException.class, () ->
                 taskManager.addNewTask(new Task("Задача 3", "описание задачи 3",
-                Status.NEW,
-                LocalDateTime.of(2024, 5, 21, 17, 0),
-                Duration.ofHours(3))), "Задача не может быть добавлена. Пересечение по времени.");
+                        Status.NEW,
+                        LocalDateTime.of(2024, 5, 21, 17, 0),
+                        Duration.ofHours(3))), "Задача не может быть добавлена. Пересечение по времени.");
 
         Assertions.assertDoesNotThrow(() -> taskManager.addNewTask(new Task("Задача 6",
                 "описание задачи 6",
